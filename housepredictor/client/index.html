@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>House Price Prediction</title>
+    <style>
+        body {
+            background-color: #686D76;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            background-color: #A9A9A9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 10px;
+        }
+        input, select {
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        input[type="submit"] {
+            background-color:#FF5B22;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin-top: 20px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        input[type="submit"]:hover {
+            background-color: darkorange;
+        }
+    </style>
+    <script>
+        async function fetchLocations() {
+            const response = await fetch('/get_location_names');
+            const data = await response.json();
+            const locationSelect = document.getElementById('location');
+            data.locations.forEach(location => {
+                const option = document.createElement('option');
+                option.value = location;
+                option.textContent = location;
+                locationSelect.appendChild(option);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchLocations();
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>House Price Prediction</h1>
+        <form id="predictionForm">
+            <label for="total_sqft">Total Square Feet:</label>
+            <input type="text" id="total_sqft" name="total_sqft" required>
+
+            <label for="location">Location:</label>
+            <select id="location" name="location" required></select>
+            <label>Upto 5 BHK only</label>
+
+            <label for="bhk">BHK:</label>
+            <input type="text" id="bhk" name="bhk" required>
+            <label>Upto 5 BATH only</label>
+
+            <label for="bath">Bath:</label>
+            <input type="text" id="bath" name="bath" required>
+
+            <input type="submit" value="Predict Price">
+        </form>
+        <h2>Estimated Price: <span id="estimated_price"></span></h2>
+        <label>* House price in lakh rupees</label>
+    </div>
+    <script>
+        document.getElementById('predictionForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/predict_house_price', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            document.getElementById('estimated_price').textContent = result.estimated_price;
+        };
+    </script>
+</body>
+</html>
